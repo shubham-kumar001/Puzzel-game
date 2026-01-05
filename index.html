@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Harmony | Animated Puzzle Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #6c5ce7;
+            filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.5));
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #b2bec3;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+            animation: slideUp 0.8s ease-out 0.3s both;
+        }
+        
+        .puzzle-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid rgba(108, 92, 231, 0.2);
+        }
+        
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .tile {
+            background-size: 400px 400px;
+            background-color: #2d3436;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        .tile:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(108, 92, 231, 0.4);
+            z-index: 10;
+        }
+        
+        .tile.moving {
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .tile.empty {
+            background-color: rgba(45, 52, 54, 0.3);
+            border: 2px dashed rgba(108, 92, 231, 0.3);
+            cursor: default;
+        }
+        
+        .tile.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .tile-number {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        
+        .game-controls {
+            flex: 1;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(108, 92, 231, 0.1);
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            color: white;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+        
+        .difficulty-selector {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(108, 92, 231, 0.1);
+        }
+        
+        .difficulty-selector h3 {
+            margin-bottom: 15px;
+            color: #a29bfe;
+            font-size: 1.3rem;
+        }
+        
+        .difficulty-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .difficulty-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .difficulty-btn.active {
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            border-color: #6c5ce7;
+        }
+        
+        .difficulty-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .win-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .win-message.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .win-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(108, 92, 231, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.5s ease 0.2s;
+        }
+        
+        .win-message.show .win-content {
+            transform: scale(1);
+        }
+        
+        .win-content i {
+            font-size: 5rem;
+            color: #6c5ce7;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .win-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .win-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+        }
+        
+        .win-stat {
+            text-align: center;
+        }
+        
+        .win-stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #636e72;
+            font-size: 0.9rem;
+            padding: 20px;
+            animation: fadeIn 1s ease-out 0.8s both;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: rgba(108, 92, 231, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes tileSlide {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+            }
+        }
+        
+        @media (max-width: 850px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .puzzle-container {
+                width: 350px;
+                height: 350px;
+            }
+            
+            .tile {
+                background-size: 350px 350px;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .puzzle-container {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .tile {
+                background-size: 300px 300px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .difficulty-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-puzzle-piece"></i>
+                <h1>Pixel Harmony</h1>
+            </div>
+            <p class="tagline">Slide the tiles to complete the beautiful image. Challenge yourself with different difficulty levels!</p>
+        </header>
+        
+        <div class="game-area">
+            <div class="puzzle-container">
+                <div class="puzzle-grid" id="puzzle-grid">
+                    <!-- Tiles will be generated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <div class="stats-panel">
+                    <div class="stat">
+                        <span><i class="fas fa-clock"></i> Time</span>
+                        <div class="stat-value" id="timer">00:00</div>
+                    </div>
+                    <div class="stat">
+                        <span><i class="fas fa-arrows-alt-h"></i> Moves</span>
+                        <div class="stat-value" id="moves">0</div>
+                    </div>
+                    <div class="stat">
+                        <span><i class="fas fa-tachometer-alt"></i> Difficulty</span>
+                        <div class="stat-value" id="difficulty">Easy</div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn-primary" id="shuffle-btn">
+                        <i class="fas fa-random"></i> Shuffle Puzzle
+                    </button>
+                    <button class="btn-secondary" id="hint-btn">
+                        <i class="fas fa-lightbulb"></i> Show Hint
+                    </button>
+                    <button class="btn-secondary" id="solve-btn">
+                        <i class="fas fa-play-circle"></i> Auto-Solve
+                    </button>
+                </div>
+                
+                <div class="difficulty-selector">
+                    <h3>Select Difficulty</h3>
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
+                        <button class="difficulty-btn" data-difficulty="medium">Medium</button>
+                        <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="win-message" id="win-message">
+        <div class="win-content">
+            <i class="fas fa-trophy"></i>
+            <h2>Puzzle Complete!</h2>
+            <p>You've successfully solved the puzzle with professional precision!</p>
+            
+            <div class="win-stats">
+                <div class="win-stat">
+                    <div class="win-stat-value" id="win-time">00:00</div>
+                    <div>Time</div>
+                </div>
+                <div class="win-stat">
+                    <div class="win-stat-value" id="win-moves">0</div>
+                    <div>Moves</div>
+                </div>
+            </div>
+            
+            <button class="btn-primary" id="play-again-btn">
+                <i class="fas fa-redo"></i> Play Again
+            </button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Pixel Harmony Puzzle Game | Professional Animation & Design | &copy; 2023</p>
+    </footer>
+
+    <script>
+        // Game state variables
+        let gameState = {
+            tiles: [],
+            emptyIndex: 8,
+            moves: 0,
+            time: 0,
+            timer: null,
+            isPlaying: false,
+            difficulty: 'easy',
+            imageSize: 400
+        };
+
+        // DOM elements
+        const puzzleGrid = document.getElementById('puzzle-grid');
+        const timerElement = document.getElementById('timer');
+        const movesElement = document.getElementById('moves');
+        const difficultyElement = document.getElementById('difficulty');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const solveBtn = document.getElementById('solve-btn');
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const winMessage = document.getElementById('win-message');
+        const winTimeElement = document.getElementById('win-time');
+        const winMovesElement = document.getElementById('win-moves');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const particlesContainer = document.getElementById('particles');
+
+        // Create background particles
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random size
+                const size = Math.random() * 4 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random animation delay and duration
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize the puzzle
+        function initPuzzle() {
+            puzzleGrid.innerHTML = '';
+            
+            // Create 9 tiles (8 numbered + 1 empty)
+            for (let i = 0; i < 9; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.dataset.index = i;
+                
+                // Calculate position in the grid
+                const row = Math.floor(i / 3);
+                const col = i % 3;
+                
+                // Set background position for each tile to show part of the image
+                const bgPosX = -col * gameState.imageSize;
+                const bgPosY = -row * gameState.imageSize;
+                
+                // For demonstration, we'll use a gradient background that looks like an image
+                // In a real game, you would set a background image here
+                const hue = (i * 40) % 360;
+                tile.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 60%), hsl(${hue + 30}, 70%, 40%))`;
+                
+                // Add tile number for visual reference
+                if (i !== 8) {
+                    const numberDiv = document.createElement('div');
+                    numberDiv.classList.add('tile-number');
+                    numberDiv.textContent = i + 1;
+                    tile.appendChild(numberDiv);
+                    
+                    // Set click handler
+                    tile.addEventListener('click', () => moveTile(i));
+                } else {
+                    tile.classList.add('empty');
+                }
+                
+                puzzleGrid.appendChild(tile);
+                gameState.tiles.push(tile);
+            }
+            
+            // Set the empty tile
+            gameState.tiles[8].classList.add('empty');
+            
+            // Reset game state
+            resetGame();
+        }
+
+        // Reset game state
+        function resetGame() {
+            gameState.moves = 0;
+            gameState.time = 0;
+            gameState.isPlaying = false;
+            gameState.emptyIndex = 8;
+            
+            // Update UI
+            movesElement.textContent = '0';
+            updateTimer();
+            
+            // Clear any existing timer
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
+            }
+            
+            // Hide win message
+            winMessage.classList.remove('show');
+            
+            // Reset tile positions to solved state
+            for (let i = 0; i < 9; i++) {
+                const tile = gameState.tiles[i];
+                const row = Math.floor(i / 3);
+                const col = i % 3;
+                
+                tile.style.gridColumn = col + 1;
+                tile.style.gridRow = row + 1;
+                tile.style.transform = 'translate(0, 0)';
+            }
+        }
+
+        // Shuffle the puzzle
+        function shufflePuzzle() {
+            // Reset game first
+            resetGame();
+            
+            // Determine shuffle complexity based on difficulty
+            let shuffleMoves;
+            switch(gameState.difficulty) {
+                case 'easy':
+                    shuffleMoves = 20;
+                    break;
+                case 'medium':
+                    shuffleMoves = 50;
+                    break;
+                case 'hard':
+                    shuffleMoves = 100;
+                    break;
+                default:
+                    shuffleMoves = 30;
+            }
+            
+            // Perform random valid moves to shuffle
+            let emptyIndex = 8;
+            let lastMove = null;
+            
+            for (let i = 0; i < shuffleMoves; i++) {
+                const possibleMoves = getAdjacentTiles(emptyIndex);
+                
+                // Filter out the reverse of the last move to avoid undo
+                const validMoves = possibleMoves.filter(move => 
+                    !(lastMove && move === getOppositeMove(lastMove, emptyIndex))
+                );
+                
+                // Randomly select a move
+                const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                
+                // Perform the move
+                swapTiles(randomMove, emptyIndex, false);
+                lastMove = randomMove;
+                emptyIndex = randomMove;
+            }
+            
+            // Update empty index in game state
+            gameState.emptyIndex = emptyIndex;
+            
+            // Start the game
+            startGame();
+        }
+
+        // Get adjacent tiles to the empty position
+        function getAdjacentTiles(emptyIndex) {
+            const adjacent = [];
+            const row = Math.floor(emptyIndex / 3);
+            const col = emptyIndex % 3;
+            
+            // Check all four directions
+            if (row > 0) adjacent.push(emptyIndex - 3); // Up
+            if (row < 2) adjacent.push(emptyIndex + 3); // Down
+            if (col > 0) adjacent.push(emptyIndex - 1); // Left
+            if (col < 2) adjacent.push(emptyIndex + 1); // Right
+            
+            return adjacent;
+        }
+
+        // Get opposite move (for shuffle algorithm)
+        function getOppositeMove(moveIndex, emptyIndex) {
+            const diff = moveIndex - emptyIndex;
+            
+            if (diff === -3) return moveIndex + 3; // Up -> Down
+            if (diff === 3) return moveIndex - 3; // Down -> Up
+            if (diff === -1) return moveIndex + 1; // Left -> Right
+            if (diff === 1) return moveIndex - 1; // Right -> Left
+            
+            return null;
+        }
+
+        // Move a tile to the empty position
+        function moveTile(tileIndex) {
+            // Check if tile is adjacent to empty position
+            const adjacentTiles = getAdjacentTiles(gameState.emptyIndex);
+            
+            if (!adjacentTiles.includes(tileIndex)) return;
+            
+            // Swap tiles with animation
+            swapTiles(tileIndex, gameState.emptyIndex, true);
+            
+            // Update empty index
+            gameState.emptyIndex = tileIndex;
+            
+            // Increment moves
+            gameState.moves++;
+            movesElement.textContent = gameState.moves;
+            
+            // Start game if not already started
+            if (!gameState.isPlaying) {
+                startGame();
+            }
+            
+            // Check if puzzle is solved
+            if (checkWin()) {
+                winGame();
+            }
+        }
+
+        // Swap two tiles with optional animation
+        function swapTiles(tileIndex, emptyIndex, animate) {
+            const tile = gameState.tiles[tileIndex];
+            const emptyTile = gameState.tiles[emptyIndex];
+            
+            // Get current grid positions
+            const tileRow = Math.floor(tileIndex / 3);
+            const tileCol = tileIndex % 3;
+            const emptyRow = Math.floor(emptyIndex / 3);
+            const emptyCol = emptyIndex % 3;
+            
+            // Calculate translation for animation
+            const dx = (emptyCol - tileCol) * 100;
+            const dy = (emptyRow - tileRow) * 100;
+            
+            if (animate) {
+                // Add moving class for animation
+                tile.classList.add('moving');
+                tile.style.setProperty('--tx', `${dx}%`);
+                tile.style.setProperty('--ty', `${dy}%`);
+                
+                // Animate the tile
+                setTimeout(() => {
+                    // Update grid positions
+                    tile.style.gridColumn = emptyCol + 1;
+                    tile.style.gridRow = emptyRow + 1;
+                    tile.style.transform = 'translate(0, 0)';
+                    
+                    // Remove moving class after animation
+                    setTimeout(() => {
+                        tile.classList.remove('moving');
+                    }, 400);
+                }, 10);
+                
+                // Update empty tile position
+                emptyTile.style.gridColumn = tileCol + 1;
+                emptyTile.style.gridRow = tileRow + 1;
+            } else {
+                // Update positions without animation
+                tile.style.gridColumn = emptyCol + 1;
+                tile.style.gridRow = emptyRow + 1;
+                emptyTile.style.gridColumn = tileCol + 1;
+                emptyTile.style.gridRow = tileRow + 1;
+            }
+            
+            // Swap tiles in array
+            [gameState.tiles[tileIndex], gameState.tiles[emptyIndex]] = 
+            [gameState.tiles[emptyIndex], gameState.tiles[tileIndex]];
+        }
+
+        // Start the game timer
+        function startGame() {
+            gameState.isPlaying = true;
+            
+            // Start timer if not already running
+            if (!gameState.timer) {
+                gameState.timer = setInterval(() => {
+                    gameState.time++;
+                    updateTimer();
+                }, 1000);
+            }
+        }
+
+        // Update timer display
+        function updateTimer() {
+            const minutes = Math.floor(gameState.time / 60).toString().padStart(2, '0');
+            const seconds = (gameState.time % 60).toString().padStart(2, '0');
+            timerElement.textContent = `${minutes}:${seconds}`;
+        }
+
+        // Check if puzzle is solved
+        function checkWin() {
+            for (let i = 0; i < 8; i++) {
+                const tile = gameState.tiles[i];
+                const currentRow = Math.floor(parseInt(tile.style.gridRow) - 1);
+                const currentCol = parseInt(tile.style.gridColumn) - 1;
+                const expectedIndex = currentRow * 3 + currentCol;
+                
+                if (expectedIndex !== i) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Win game
+        function winGame() {
+            // Stop timer
+            clearInterval(gameState.timer);
+            gameState.timer = null;
+            
+            // Update win stats
+            winTimeElement.textContent = timerElement.textContent;
+            winMovesElement.textContent = gameState.moves;
+            
+            // Show win message with delay for final animation
+            setTimeout(() => {
+                winMessage.classList.add('show');
+            }, 500);
+        }
+
+        // Show hint by highlighting possible moves
+        function showHint() {
+            const adjacentTiles = getAdjacentTiles(gameState.emptyIndex);
+            
+            // Reset all tiles
+            gameState.tiles.forEach(tile => {
+                tile.style.boxShadow = '';
+            });
+            
+            // Highlight adjacent tiles
+            adjacentTiles.forEach(index => {
+                gameState.tiles[index].style.boxShadow = '0 0 20px #6c5ce7';
+            });
+            
+            // Remove highlight after 2 seconds
+            setTimeout(() => {
+                adjacentTiles.forEach(index => {
+                    gameState.tiles[index].style.boxShadow = '';
+                });
+            }, 2000);
+        }
+
+        // Auto-solve the puzzle (simplified)
+        function autoSolve() {
+            // Reset game first
+            resetGame();
+            
+            // Show a message since we're not implementing a full solver
+            alert("Auto-solve would complete the puzzle algorithmically. In a full implementation, this would use A* or similar algorithm to solve the puzzle step-by-step.");
+            
+            // For demonstration, we'll just solve it instantly
+            initPuzzle();
+            winGame();
+        }
+
+        // Change difficulty
+        function changeDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+            difficultyElement.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+            
+            // Update active button
+            difficultyButtons.forEach(btn => {
+                if (btn.dataset.difficulty === difficulty) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Event listeners
+        shuffleBtn.addEventListener('click', shufflePuzzle);
+        hintBtn.addEventListener('click', showHint);
+        solveBtn.addEventListener('click', autoSolve);
+        playAgainBtn.addEventListener('click', () => {
+            shufflePuzzle();
+        });
+
+        // Difficulty buttons
+        difficultyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                changeDifficulty(btn.dataset.difficulty);
+            });
+        });
+
+        // Initialize the game
+        function initGame() {
+            createParticles();
+            initPuzzle();
+            
+            // Add keyboard controls
+            document.addEventListener('keydown', (e) => {
+                if (!gameState.isPlaying) return;
+                
+                const emptyIndex = gameState.emptyIndex;
+                const row = Math.floor(emptyIndex / 3);
+                const col = emptyIndex % 3;
+                let tileToMove = null;
+                
+                switch(e.key) {
+                    case 'ArrowUp':
+                        if (row < 2) tileToMove = emptyIndex + 3;
+                        break;
+                    case 'ArrowDown':
+                        if (row > 0) tileToMove = emptyIndex - 3;
+                        break;
+                    case 'ArrowLeft':
+                        if (col < 2) tileToMove = emptyIndex + 1;
+                        break;
+                    case 'ArrowRight':
+                        if (col > 0) tileToMove = emptyIndex - 1;
+                        break;
+                }
+                
+                if (tileToMove !== null) {
+                    moveTile(tileToMove);
+                }
+            });
+        }
+
+        // Start the game when page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
